@@ -1,0 +1,17 @@
+- hosts: webserver
+  become: yes
+  tasks:
+  
+        - name: Install httpd
+          yum:
+            name: httpd
+            state: latest
+
+
+        - name: Copy vhost file
+          copy:
+            src: /root/apache_vhost
+            dest: /etc/httpd/conf.d/default.conf
+            owner: root
+            group: root
+            mode: '0644'
