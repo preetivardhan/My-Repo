@@ -2,6 +2,7 @@ RHEL - Make file system
 
 df -Th [To know the file systems of all mounts]
 lsblk [List the attached drive]
+lsblk -f [List of attached drive to the instance with drive UUID]
 fdisk -l
 
 mkfs.ext4 /dev/n*
