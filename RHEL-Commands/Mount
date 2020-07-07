@@ -8,5 +8,8 @@ fdisk -l
 mkfs.ext4 /dev/n*
 mount /dev/n* /data (data is any available mount point on the system)
 
+###Use the below if you get UUID conflict error## This will mount but goes off after server reboot############
+mount -o rw,nouuid /dev/nvme2n1 /data01
+
 ======YUM======
 yum list available | grep -i package* [Check if the package is available on the repo]
