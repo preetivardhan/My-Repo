@@ -1,0 +1,3 @@
+nsupdate
+update add dl-dhc-app01.aws.cloud.epsilon. 86400 A {server IP here}
+send
