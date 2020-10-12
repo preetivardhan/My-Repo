@@ -3,5 +3,7 @@ Check certificate expire of an existing site
 openssl s_client -connect www.vyvanse.com:443 \
   -servername www.vyvanse.com 2> /dev/null |  openssl x509 -noout  -dates
   
-  ============================================
+============================================
+PEM to DER conversion  
+openssl pkcs8 -topk8 -inform PEM -outform DER -in localhostprivate.key -out localhostprivate.der -nocrypt
   
