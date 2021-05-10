@@ -1,0 +1,17 @@
+- hosts: server
+  become: yes
+  tasks:
+  - name: Create a login user
+		  user:
+			name: username
+			password: '???'
+			groups: # Empty by default, here we give it some groups
+			- docker
+			- sudo
+			state: present
+			shell: /bin/bash       # Defaults to /bin/bash
+			system: no             # Defaults to no
+			createhome: yes        # Defaults to yes
+			home: /home/username  # Defaults to /home/<username>
+      
+      #To generate password usinf openssl do 'openssl passwd'. It will provide a encrypted password and we can use that encrypted pass here in the playbook (Replicing ??? in the above playbook)
