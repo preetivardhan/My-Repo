@@ -1,0 +1,7 @@
+- hosts: appserver
+  become: yes
+  tasks:
+  - name: Upgrade all packages
+  yum:
+    name: '*'
+    state: latest
