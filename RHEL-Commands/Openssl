@@ -1,6 +1,6 @@
 Check certificate expire of an existing site
 
-openssl s_client -connect www.vyvanse.com:443 \
+openssl s_client -connect www.example.com:443 \
   -servername www.vyvanse.com 2> /dev/null |  openssl x509 -noout  -dates
   
 ============================================
