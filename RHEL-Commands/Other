@@ -1,0 +1,6 @@
+#######Make the file immutable so that even root can not delete it#########
+chattr +i file_name 
+
+###########snip the huge log file#########
+:1,.d   [Go to the line of a file from where the above lines are to be deleted]  --> Deletes everyline above the cursor
+:.,$d   [Go to the line of a file from where the below lines are to be deleted]  --> Deletes everyline below the cursor
