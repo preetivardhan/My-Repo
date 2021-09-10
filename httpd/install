@@ -1,0 +1,32 @@
+Install latest version on apache httpd on Linux
+Navigate to desired directory on the server (Anywhere you have some storage space to store the httpd tar files)
+Download the tar file - 
+wget http://mirrors.estointernet.in/apache/httpd/httpd-2.4.46.tar.gz      {Always see what the latest version available - http://mirrors.estointernet.in/apache/httpd/ }
+Unzip
+gzip -d httpd-2.4.46.tar.gz;tar -xvf httpd-2.4.46.tar
+cd httpd-2.4.46/srclib
+Download dependency files (apr and apr-util)
+wget http://mirrors.estointernet.in/apache/apr/apr-1.7.0.tar.gz;wget http://mirrors.estointernet.in/apache/apr/apr-util-1.6.1.tar.gz
+Unzip
+gzip -d apr-1.7.0.tar.gz;tar -xvf apr-1.7.0.tar
+gzip -d apr-util-1.6.1.tar.gz;tar -xvf apr-util-1.6.1.tar
+Rename 
+mv apr-1.7.0 apr;mv apr-util-1.6.1 apr-util
+Install other dependencies (pcre and GCC)
+yum -y install pcre-devel gcc
+Install expat (another dependency)
+wget https://github.com/libexpat/libexpat/releases/download/R_2_2_9/expat-2.2.9.tar.bz2
+tar xvjf expat-2.2.9.tar.bz2 -C /opt/apache_files    	{/opt/apache_files – This the directory where you want to untar the expat files}
+cd /path/to/untar    {{/opt/apache_files in this case}
+./configure --prefix=/opt/apache_files/
+make
+make install
+cd /opt/aem/dispatcher/httpd-2.4.46/ 		{This is the directory that you downloaded the very first httpd tar file as per this doc}
+./configure --with-included-apr --prefix=/etc/httpd --with-expat=/opt/apache_files  {/opt/apache_files – This is the path of your expat make sure you CHANGE accrodingly}
+make
+make install
+
+/etc/httpd/bin/apachectl restart
+/etc/httpd/bin/httpd restart
+
+/etc/httpd/bin/apachectl -v
