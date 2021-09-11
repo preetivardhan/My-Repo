@@ -1,0 +1,10 @@
+#!/bin/bash
+
+ytd=$(date +%Y%m%d)
+sed -i "s/email=[A-Za-z0-9][A-Za-z0-9][A-Za-z0-9][A-Za-z0-9][A-Za-z0-9][A-Za-z0-9]/email=XXXXXX/gi" /data/logs/*.log-$ytd
+
+sed -i "s/firstname=[A-Za-z][A-Za-z][A-Za-z][A-Za-z]/firstname=XXXX/gi" /data/logs/*.log-$ytd
+
+sed -i "s/lastname=[A-Za-z][A-Za-z]/lastname=XX/gi" /data/logs/*.log-$ytd
+
+sed -i "s/phone=[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]/phone=XXXXXXXXXX/gi" /data/logs/*.log-$ytd
