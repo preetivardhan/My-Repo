@@ -1,0 +1,256 @@
+---
+ - hosts: aem
+   name: Deployment of AEM Publisher and Author 
+   gather_facts: True
+   become: true 
+
+   vars_prompt:
+   
+    - name: RunModeAuth
+      prompt: "Please enter the Author RunMode"
+      private: no
+      
+    - name: JVMAuth
+      prompt: "Please enter the jvm value you want to set for Author"
+      private: no
+      unsafe: yes
+
+    - name: RunModePublish
+      prompt: "Please enter the Publish RunMode"
+      private: no
+
+    - name: JVMPublish
+      prompt: "Please enter the jvm value to be set for Publish"
+      private: no
+      unsafe: yes
+
+    - name: AuthPortNumber
+      prompt: "Please enter the Port number for Author"
+      private: no
+
+    - name: PublishPortNumber
+      prompt: "Please enter the Port number for Publish"
+      private: no  
+
+    - name: SrcDirectory
+      prompt: "Enter the path of the local directory containing the aem jar file to be copied to remote"
+      private: no
+      unsafe: yes      
+
+    - name: DestDirectory1
+      prompt: "Enter the remote directory path where the aem jar file needs to be copied to"
+      private: no
+      unsafe: yes
+      
+    - name: DestDirectory2
+      prompt: "Enter the name of the directory to be created for aem publish deployment"
+      private: no
+      unsafe: yes      
+    
+    - name: RpmFileName
+      prompt: "Enter the name of the rpm file copied to the remote server"
+      private: no
+      unsafe: yes  
+  
+    - name: JarFileName
+      prompt: "Enter the name of the JAR file that needs to be copied to remote server"
+      private: no
+      unsafe: yes  
+
+    - name: VersionNumber
+      prompt: "Enter the aem jar file version number , ex: 64 or 65"
+      private: no
+
+    - name: User
+      prompt: "Execute all commands as the user"
+      private: no  
+ 
+    - name: SoftLimit
+      prompt: "Soft limit value you want to configure for the number of open file descriptors for the User"
+      private: no
+ 
+    - name: HardLimit
+      prompt: "Hard limit value you want to configure for the number of open file descriptors for the User"
+      private: no      
+      
+   tasks:
+
+   - name: Check Java binary existence
+     shell: command -v java
+     register: java_result
+     ignore_errors: True
+     changed_when: false
+ 
+   - debug:
+        msg: "{{ java_result.stdout }}" 
+
+   - name: Check the status of the remote directory
+     stat:
+        path: "{{ DestDirectory1 }}"     
+     register: remote_dir_status
+   
+   - name: Verify if remote directory path exists prior to copying jar file from local to remote
+     debug:
+        msg: "Directory exists"
+     when: remote_dir_status.stat.isdir is defined
+     
+   - name: Create remote directory path if it does not exist
+     file:
+        path: "{{ DestDirectory1 }}" 
+        state: directory
+        owner: "{{ User }}"
+        group: "{{ User }}"
+        mode: '0755'
+     when: remote_dir_status.stat.exists == false        
+     
+   - name: Copy jar file from local to remote server
+     copy:
+        src: "{{ SrcDirectory }}/{{ JarFileName }}"
+        dest: "{{ DestDirectory1 }}"
+        owner: "{{ User }}"
+        group: "{{ User }}"
+        mode: '0644'
+     when: remote_dir_status.stat.exists
+         
+   - name: Copy local jdk file to remote 
+     copy:
+        src: "{{ SrcDirectory }}/{{ RpmFileName }}" 
+        dest: "{{ DestDirectory1 }}"
+        owner: "{{ User }}"
+        group: "{{ User }}"
+        mode: '0644' 
+
+   - name: Copy license file to remote aem author folder
+     copy:
+        src: "{{ SrcDirectory }}/license.properties" 
+        dest: "{{ DestDirectory1 }}"
+        owner: "{{ User }}"
+        group: "{{ User }}"
+        mode: '0644'
+        
+     
+   - name: Install Java JDK from local rpm file copied to remote
+     yum: 
+        state: present 
+        name: "{{ DestDirectory1 }}/{{ RpmFileName }}"           
+
+   - name: Verify if the copied jar file exists
+     stat: 
+        path: "{{ DestDirectory1 }}/aem{{ VersionNumber }}-{{ RunModeAuth }}-p{{ AuthPortNumber }}.jar"
+     register: aem_jar_status
+     
+   - name: Provides information if the copied jar file exists
+     debug:    
+        msg: "Copied jar file exists on the remote server"
+     when: aem_jar_status.stat.exists
+     
+   - name: Create a directory for aem publish installation
+     file:
+        path: "{{ DestDirectory2 }}"
+        state: directory
+        mode: '0755'
+        owner: "{{ User }}"
+        group: "{{ User }}"
+
+   - name: Check the status of the newly created directory for aem publish installation
+     stat:
+        path: "{{ DestDirectory2 }}"     
+     register: dest_dir_status     
+   
+   - name: Copy license file from local folder to remote publish folder
+     copy:
+        src: "{{ SrcDirectory }}/license.properties" 
+        dest: "{{ DestDirectory2 }}"
+        owner: "{{ User }}"
+        group: "{{ User }}"
+        mode: '0644' 
+     when: dest_dir_status.stat.exists
+     
+   - name: Copy existing jar file as another component i.e. rename author to publish or vice versa
+     copy: 
+        src: "{{ DestDirectory1 }}/aem{{ VersionNumber }}-{{ RunModeAuth }}-p{{ AuthPortNumber }}.jar"
+        dest: "{{ DestDirectory2 }}/aem{{ VersionNumber }}-{{ RunModePublish }}-p{{ PublishPortNumber }}.jar"
+        backup: yes
+     when: aem_jar_status.stat.exists     
+     
+   - name: Configure appropriate user limits for number of open file descriptors
+     pam_limits:
+        domain: "{{ User }}"
+        limit_type: "{{ item.limit_type }}"
+        limit_item: "{{ item.limit_item }}"
+        value: "{{ item.value }}"
+     with_items:
+        - { limit_type: 'soft', limit_item: 'nofile', value: '{{ SoftLimit }}' }
+        - { limit_type: 'hard', limit_item: 'nofile', value: '{{ HardLimit }}' } 
+     register: ulimits_result   
+     
+
+   - name: Reset ssh connection to reload the configuration changes made for nofile limits in /etc/security/limits.conf file
+     meta: reset_connection
+     
+     
+   - name: Run aem author application with a lapse time of 15 minutes
+     command: java -jar  aem{{ VersionNumber }}-{{ RunModeAuth }}-p{{ AuthPortNumber }}.jar -nointeractive
+     become: yes
+     become_user: "{{ User }}"
+     args:
+        chdir: "{{ DestDirectory1 }}"
+     async: 480
+     poll: 90
+     ignore_errors: True     
+       
+   - name: Edit the author configuration file located at $DestDirectory1/crx-quickstart/bin/start with the AuthorPortNumber
+     lineinfile:
+        path: "{{ DestDirectory1 }}/crx-quickstart/bin/start"
+        regexp: '^\tCQ_PORT='
+        line: "\tCQ_PORT={{ AuthPortNumber }}"         
+        firstmatch: yes
+
+   - name: Edit the author configuration file located at $DestDirectory1/crx-quickstart/bin/start with the RunMode Name
+     lineinfile:
+        path: "{{ DestDirectory1 }}/crx-quickstart/bin/start"
+        regexp: '^\tCQ_RUNMODE='
+        line: "\tCQ_RUNMODE='{{ RunModeAuth }}'"
+        firstmatch: yes
+         
+   - name: Edit the author configuration file located at $DestDirectory1/crx-quickstart/bin/start with the jvm option
+     lineinfile:
+        path: "{{ DestDirectory1 }}/crx-quickstart/bin/start"
+        regexp: '^\tCQ_JVM_OPTS='
+        insertbefore: '^\t# add the required JPMS modules'
+        line: "\tCQ_JVM_OPTS='-server -{{ JVMAuth }} -XX:MaxPermSize=256M -Djava.awt.headless=true'"
+        firstmatch: yes
+     
+   - name: Run aem publish application with a lapse time of 15 minutes
+     command: java -jar  aem{{ VersionNumber }}-{{ RunModePublish }}-p{{ PublishPortNumber }}.jar -nointeractive
+     become: yes
+     become_user: "{{ User }}"
+     args:
+        chdir: "{{ DestDirectory2 }}"
+     async: 480
+     poll: 90 
+     ignore_errors: True
+       
+   - name: Edit the publish configuration file located at $DestDirectory2/crx-quickstart/bin/start with the AuthorPortNumber
+     lineinfile:
+        path: "{{ DestDirectory2 }}/crx-quickstart/bin/start"
+        regexp: '^\tCQ_PORT='
+        line: "\tCQ_PORT={{ PublishPortNumber }}"         
+        firstmatch: yes
+
+   - name: Edit the author configuration file located at $DestDirectory2/crx-quickstart/bin/start with the RunMode Name
+     lineinfile:
+        path: "{{ DestDirectory2 }}/crx-quickstart/bin/start"
+        regexp: '^\tCQ_RUNMODE='
+        line: "\tCQ_RUNMODE='{{ RunModePublish }}'"
+        firstmatch: yes
+         
+   - name: Edit the author configuration file located at $DestDirectory2/crx-quickstart/bin/start with the jvm option
+     lineinfile:
+        path: "{{ DestDirectory2 }}/crx-quickstart/bin/start"
+        regexp: '^\tCQ_JVM_OPTS='
+        insertbefore: '^\t# add the required JPMS modules'
+        line: "\tCQ_JVM_OPTS='-server -{{ JVMPublish }} -XX:MaxPermSize=256M -Djava.awt.headless=true'"
+        firstmatch: yes     
+     
+     
