@@ -1,0 +1,272 @@
+pipeline {
+    agent any
+    tools {
+        maven 'Maven 3.6.3'
+    }
+    environment {
+        QA_EMAILS = 'asutosh.jena@epsilon.com'
+        DEV_EMAILS = 'asutosh.jena@epsilon.com'
+    }
+    stages {
+        stage ('Deploy to Dev') {
+            when {
+                branch 'develop'
+            }
+            environment {
+                ADMIN_CRED = credentials('AEM_DEV_ADMIN')
+                AUTH_HOST = "10.55.48.18"
+                AUTH_PORT = "4502"
+                PUB_HOST = "10.55.48.18"
+                PUB_PORT = "4503"
+
+            }
+            steps {
+                configFileProvider([configFile(fileId: '0d5ec88d-25fc-4a48-b049-b51acd88052d', variable: 'GLOBAL_MAVEN')]) {
+                    sh """ mvn clean install -Dcrx.host=$AUTH_HOST -Dcrx.port=$AUTH_PORT -PautoInstallPackage -Dcrx.username=$ADMIN_CRED_USR -Dcrx.password=$ADMIN_CRED_PSW -s $GLOBAL_MAVEN"""
+                    sh """ mvn clean install -Dcrx.host=$PUB_HOST -Dcrx.port=$PUB_PORT -PautoInstallPackage -Dcrx.username=$ADMIN_CRED_USR -Dcrx.password=$ADMIN_CRED_PSW -s $GLOBAL_MAVEN"""
+                }
+            }
+
+            post {
+                always {
+
+                    emailext(
+                            to: "${env.DEV_EMAILS}",
+                            subject: "${currentBuild.currentResult}: Job ${env.JOB_NAME} [${env.BUILD_NUMBER}]",
+                            body: "<P>Build ${env.BRANCH_NAME}<p><p>Job completed: Details at <a href='${env.RUN_DISPLAY_URL}'>${env.RUN_DISPLAY_URL}</p>",
+                    )
+
+                }
+            }
+        }
+        stage ('Deploy to QA') {
+            when {
+                branch 'qa'
+            }
+            environment {
+                ADMIN_CRED = credentials('QA_ADMIN')
+                AUTH_HOST = "10.55.48.17"
+                AUTH_PORT = "4502"
+                PUB_HOST = "10.55.48.16"
+                PUB_PORT = "4503"
+            }
+            steps {
+                configFileProvider([configFile(fileId: '0d5ec88d-25fc-4a48-b049-b51acd88052d', variable: 'GLOBAL_MAVEN')]) {
+                    sh """ mvn clean install -Dcrx.host=$AUTH_HOST -Dcrx.port=$AUTH_PORT -PautoInstallPackage -Dcrx.username=$ADMIN_CRED_USR -Dcrx.password=$ADMIN_CRED_PSW -s $GLOBAL_MAVEN"""
+                    sh """ mvn clean install -Dcrx.host=$PUB_HOST -Dcrx.port=$PUB_PORT -PautoInstallPackage -Dcrx.username=$ADMIN_CRED_USR -Dcrx.password=$ADMIN_CRED_PSW -s $GLOBAL_MAVEN"""
+                }
+            }
+            post {
+                always {
+                    emailext (
+                            to: "${env.QA_EMAILS}",
+                            subject: "${currentBuild.currentResult}: $env.JOB_NAME [${env.BUILD_NUMBER}]",
+                            body: "<P>Build ${env.BRANCH_NAME}<p><p>Job completed: Details at <a href='${env.RUN_DISPLAY_URL}'>${env.RUN_DISPLAY_URL}</p>"
+                    )
+                }
+            }
+        }
+    }
+    post {
+        always {
+            cleanWs()
+            dir("${env.WORKSPACE}@tmp") {
+                deleteDir()
+            }
+            dir("${env.WORKSPACE}@script") {
+                deleteDir()
+            }
+            dir("${env.WORKSPACE}@script@tmp") {
+                deleteDir()
+            }
+        }
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+-----------------------------------------------
+
+def mavenPom
+properties([buildDiscarder(logRotator(artifactDaysToKeepStr: '', artifactNumToKeepStr: '', daysToKeepStr: '10', numToKeepStr: '')), disableConcurrentBuilds(), disableResume(),pipelineTriggers([githubPush()])])
+pipeline {
+    agent any
+	parameters{
+       booleanParam(defaultValue: false, description: '', name: 'SkipTest')
+	   booleanParam(defaultValue: false, description: '', name: 'SkipSonarQubeAnalysis')
+	   booleanParam(defaultValue: false, description: '', name: 'SkipVeracodeScan')
+	   string(
+			defaultValue: 'http://3.6.165.101:4502/crx/packmgr/service.jsp',
+			description: 'Enter CRX package manager URL for target AEM Author instance,	defaults to http://3.6.165.101:4502/crx/packmgr/service.jsp, which is Public IP of Demo AEM Instance',
+			name: 'AUTHOR_CRX_URL',
+			trim: true
+			)
+		string(
+			defaultValue: 'http://3.6.165.101:4503/crx/packmgr/service.jsp', 
+			description: 'Enter CRX package manager URL for target AEM Publish instance, defaults to http://3.6.165.101:4503/crx/packmgr/service.jsp, which is Public IP of Demo AEM Instance',
+			name: 'PUBLISH_CRX_URL',
+			trim: true
+			)
+		string(
+		    defaultValue: 'nikesh.shindhe@epsilonconversant.com',
+		    description: 'Provide a list of email addresses separated by space that need to be notified at the end of this build.',
+		    name: 'EMAIL_ADDRESS',
+		    trim: true)
+    }
+    tools {
+        jdk 'jdk-11'
+        maven 'maven-3.6.3'
+    }
+    
+    stages {
+
+        stage('Git Checkout') {
+            steps {
+                //start with a clean workspace
+                deleteDir()
+                echo 'Checking out git repository'
+                git branch: 'develop', credentialsId: '84c5ce8a-8c08-4742-9412-db2c5ec207b5', url: 'https://github.com/LundbeckDW/lundbeck-commons.git'
+            }
+        }
+
+        stage('Build and Test') {
+            steps {
+                //input ('Do you want to proceed?')
+                script {
+                    try {
+						if(params.SkipTest == true) {
+							
+							echo "Skipping Tests"
+							//sh 'mvn clean install -Dmaven.test.skip=true'
+							sh 'mvn clean install -Dmaven.test.skip=true'
+						} else {
+							echo "Build with Tests"
+							sh 'mvn clean install'
+						}
+                        echo "Build completed. RESULT: ${currentBuild.currentResult}"
+                    } catch (Throwable e) {
+                        echo "The current build has failed. Please check logs."
+                        error "ERROR! Stop pipeline excution!"
+                    }
+                }
+            }
+			
+        }
+		/**
+		stage('SonarQube Analysis') {
+		when {
+                expression { params.SkipSonarQubeAnalysis != true }
+            }
+		environment {
+        scannerHome = tool 'SonarQubeScanner'
+			}
+            steps {
+				script{
+					try{
+						echo "SonarQube Analysis"
+				        withSonarQubeEnv(credentialsId: 'loyltydemo', installationName: 'sonarqualitygate'){
+						sh "${scannerHome}/bin/sonar-scanner"
+						}
+						timeout(time: 3, unit: 'MINUTES') {
+						//waitForQualityGate abortPipeline: true
+						}
+					} catch (Throwable e) {
+						if(params.ContinueOnSonarFailure == true) {
+							echo "ERROR in SonarQube Analysis. Continue pipeline execution."
+							echo "Build Status : ${currentBuild.currentResult}"
+							unstable('SonarQube Analysis failed!')
+							//currentBuild.result = "FAILED" 							
+						} else {
+							currentBuild.result = "FAILED" 
+							error "ERROR in SonarQube Analysis. Stop pipeline excution!"
+						}
+						
+					}
+				}
+            }
+        }
+		
+		stage('Veracode - Upload and Scan') {
+			when {
+                expression { params.SkipVeracodeScan != true }
+			}
+			steps {
+				withCredentials([usernamePassword(credentialsId: 'veracode-credentials', usernameVariable: 'VERACODE_API_ID',
+				passwordVariable: 'VERACODE_API_KEY')])
+				{
+					veracode applicationName: 
+					'POC Lundbeck - Nohmatters-hcp', createProfile: true,createSandbox: true, canFailJob: true, criticality: 'VeryHigh', debug: true, 
+					fileNamePattern: '', pHost: '', pPassword: '', pPort: '', 
+					pUser: '', replacementPattern: '', sandboxName: 'nohmatters-hcp', scanExcludesPattern: '', 
+					scanIncludesPattern: '', scanName: '$buildnumber', teams: '', timeout: 60, uploadExcludesPattern: '', 
+					uploadIncludesPattern: '', vid:'' , vkey:'' , waitForScan: true
+				}
+			}
+		}
+		
+	**/
+		
+      stage('Deploy to AEM server') {
+			steps {
+					withCredentials([usernamePassword(credentialsId: 'poc-admin-user', passwordVariable: 'password', usernameVariable: 'user')]) {
+					script{
+						mavenPom = readMavenPom file: 'pom.xml'
+						echo "Deploy to AEM Author Instance"
+						sh "curl -u ${user}:'${password}' -F file=@'/var/lib/jenkins/.m2/repository/com/lundbeck/commons/lundbeck-commons.ui.apps/${mavenPom.version}/lundbeck-commons.ui.apps-${mavenPom.version}.zip' -F name='lundbeck-commons.ui.apps-${mavenPom.version}' -F force=true -F install=true ${params.AUTHOR_CRX_URL}"
+						//sh "curl -u ${user}:'${password}' -F file=@'/var/lib/jenkins/.m2/repository/com/lundbeck/commons/lundbeck-commons.ui.content/${mavenPom.version}/lundbeck-commons.ui.content-${mavenPom.version}.zip' -F name='lundbeck-commons.ui.content-${mavenPom.version}' -F force=true -F install=true ${params.AUTHOR_CRX_URL}"
+						//echo "Deploy to AEM Publish Instance"
+						//sh "curl -u ${user}:'${password}' -F file=@'/var/lib/jenkins/.m2/repository/com/lundbeck/commons/lundbeck-commons.ui.apps/${mavenPom.version}/lundbeck-commons.ui.apps-${mavenPom.version}.zip' -F name='lundbeck-commons.ui.apps-${mavenPom.version}' -F force=true -F install=true ${params.PUBLISH_CRX_URL}"
+						//sh "curl -u ${user}:'${password}' -F file=@'/var/lib/jenkins/.m2/repository/com/lundbeck/commons/lundbeck-commons.ui.content/${mavenPom.version}/lundbeck-commons.ui.content-${mavenPom.version}.zip' -F name='lundbeck-commons.ui.content-${mavenPom.version}' -F force=true -F install=true ${params.PUBLISH_CRX_URL}"
+					}
+				}
+			}
+     }
+	 
+
+    }
+	
+	post {
+        success {
+            echo "Build Success : : ${env.BUILD_NUMBER}"
+			echo "RESULT: ${currentBuild.currentResult}"
+        }
+        failure {
+            echo "Build Failure : ${env.BUILD_NUMBER}"
+			echo "RESULT: ${currentBuild.currentResult}"
+        }
+		always {
+		    script{
+                if(params.EMAIL_ADDRESS?.trim()){
+                    emailext attachLog: true,
+                    subject: "POC - Lundbeck Nohmatters-hcp - Status of Build: ${currentBuild.fullDisplayName} - ${currentBuild.result}",
+                    body: "${env.JOB_NAME} #${env.BUILD_NUMBER} has result ${currentBuild.result}.\n\nView the console at: ${env.BUILD_URL}. Build log is attached.\n\n",
+                    to: "${params.EMAIL_ADDRESS}"
+                }
+                else{
+                    echo "No Email address provided in build parameter, skipping sending email"
+                }
+            }
+        }
+    }
+}
