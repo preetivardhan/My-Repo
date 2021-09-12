@@ -1,0 +1,8 @@
+Download package
+curl -u admin:admin https://localhost:4502/etc/packages/export/package.zip > name_package.zip
+
+Force upload
+curl -u admin:admin -F cmd=upload -F force=true -F package=@test.zip http://localhost:4502/crx/packmgr/service/.json
+
+Install
+curl -u admin:admin -F cmd=install http://localhost:4502/crx/packmgr/service/.json/etc/packages/my_packages/test.zip
