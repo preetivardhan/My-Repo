@@ -1,0 +1,122 @@
+ansible-playbook -vvv aem-playbook.yml
+ansible-playbook -vvv aem-playbook.yml
+cd /etc/ansible/
+vi ansible.cfg
+cd /etc/ansible/
+cd /etc/ansible/
+vi ansible.cfg
+cd /etc/ansible/
+vi ansible.cfg
+cd /etc/ansible/
+vi ansible.cfg
+history|grep -i ansible
+ansible-doc get_url
+cd /etc/ansible/
+ansible-playbook --syntax-check test.yaml
+ansible-playbook --syntax-check test.yaml
+ansible-playbook --syntax-check test.yaml
+ansible-playbook --syntax-check test.yaml
+cd /etc/ansible/
+ansible-playbook --syntax-check test.yaml
+ansible-palybook -vvv test.yaml
+ansible-playbook test.yaml
+cd /etc/ansible/
+ansible-playbook test.yaml
+cd /etc/ansible/
+vi ansible.cfg
+ansible-playbook test.yaml
+ansible-playbook test.yaml
+ansible-playbook install_httpd.yaml
+cd /etc/ansible/
+vi ansible.cfg
+ansible-playbook install_httpd.yaml
+ansible-playbook install_httpd.yaml
+cd /etc/ansible/
+cd ansible/
+ansible-playbook install_nodejs.yaml
+ansible-playbook install_httpd.yaml
+cd .ansible/
+cd /etc/ansible/
+mkdir ansible_playbooks
+mv install_* ./ansible_playbooks/
+cd ansible_playbooks/
+ansible-playbook install_apache243.yaml --syntax.check
+ansible-playbook install_apache243.yaml --syntax check
+ansible-playbook install_apache243.yaml --syntax.check
+cd ansible_playbooks/
+ansible-playbook install_apache243.yaml --sytax.check
+ansible-playbook install_apache243.yaml --check
+cd /etc/ansible/
+ansible-playbook install_apache243.yaml --check
+ansible-playbook install_apache243.yaml --check
+ansible-playbook install_apache243.yaml --check
+ansible-playbook install_apache243.yaml --check
+ansible-playbook install_apache243.yaml --check
+ansible-playbook install_apache243.yaml --check
+ansible-playbook install_apache243.yaml
+vi ansible.cfg
+ansible-playbook install_apache243.yaml
+vi ansible.cfg
+cd /root/ansible_playbooks/
+ansible-playbook install_apache243.yaml --check
+vi ansible.cfg
+vi ansible.cfg
+ansible-playbook install_apache243.yaml
+vi ansible.cfg
+cd /etc/ansible/
+vi ansible.cfg
+vi ansible.cfg
+cd ansible_playbooks/
+ansible-playbook --ask-valt-pass --extra-vars '/root/passwd.yaml' install_apache243.yaml
+ansible-playbook--ask-valt-pass--extra-vars '/root/passwd.yaml' install_apache243.yaml
+cd /etc/ansible/
+cd /root/ansible_playbooks/
+ansible-playbook install_apache243.yaml
+ansible-playbook install_apache243.yaml
+ansible-playbook install_apache243.yaml
+cd /etc/ansible/
+ansible-vault create passwd.yml
+vi ansible.cfg
+cd ansible_playbooks/
+ansible-playbook --ask-vault-pass --extra-vars '@/etc/ansible/passwd.yml' playbook.yml
+ansible-playbook --ask-vault-pass --extra-vars '@/etc/ansible/passwd.yml' install_apache243.yaml
+cd /etc/ansible/
+vi ansible.cfg
+ansible all -m ping -vvv
+vi ansible.cfg
+ansible all -m ping -vvv
+vi ansible.cfg
+vi ansible.cfg
+ansible-vault create passwd.yml
+ansible-playbook --ask-vault-pass --extra-vars '@/etc/ansible/passwd.yml' install_apache243.yaml
+cd /root/ansible_playbooks/
+ansible-playbook --ask-vault-pass --extra-vars '@/etc/ansible/passwd.yml' install_apache243.yaml
+cd /root/ansible_playbooks/
+cd /etc/ansible/
+ansible-playbook install_nodejs.yaml
+ansible-playbook install_nodejs.yaml
+vi ansible.cfg
+ansible-playbook install_nodejs.yaml
+vi ansible.cfg
+ansible-playbook install_nodejs.yaml
+vi ansible.cfg
+vi ansible.cfg
+cd /root/ansible_playbooks/
+ansible-playbook install_nodejs.yaml
+cd /etc/ansible/
+cd ansible_playbooks/
+history|grep -i ansible
+cd /etc/ansible/
+vi ansible.cfg
+vi ansible.cfg
+cd ansible_playbooks/
+ansible-playbook install_apache243.yaml --syntax.check
+ansible-playbook install_apache243.yaml --check
+ansible-playbook create_unixuser.yaml --check
+ansible-playbook create_unixuser.yaml --check
+ansible-playbook create_unixuser.yaml --check
+ansible-playbook create_unixuser.yaml --check
+ansible-playbook create_unixuser.yaml
+ansible-playbook create_unixuser.yaml
+history|ansible
+history|grep -i ansible
