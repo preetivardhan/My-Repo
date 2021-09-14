@@ -1,0 +1,1 @@
+sshpass -p "$SV_PASS" scp -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no ./file/path/*.js $SV_USER@$IP:/path/to/copy
