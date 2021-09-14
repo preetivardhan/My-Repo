@@ -1,0 +1,54 @@
+pipeline {
+    agent any
+    triggers {
+		cron('0 0 * * *')
+	}
+	environment {
+		EMAIL_RECIPIENTS = "KrishnaChaitanya.Puldindi@epsilon.com,Asutosh.Jena@epsilon.com,Sudha.SG@epsilon.com,bhuwan.bhaskar@epsilon.com,basavaraj.chulachannavar@epsilon.com,Ramesh.Mani@epsilon.com,Nithyananda.NannivalSuresh@epsilon.com,Rohit.Parkhe@epsilon.com,vijay.kesavan@epsilon.com,BharathKumar.Ambigi@epsilon.com"
+	}
+	parameters {
+		string(name: 'PASSWD', defaultValue: 'Epsilon@123', description: 'Password variable')
+		string(name: 'AUTHOR_IP', defaultValue: '10.0.0.2', description: 'Author IP address information')
+		string(name: 'PUBLISH_IP', defaultValue: '10.0.0.3', description: 'Publish IP address information')
+	}
+	tools {
+		jdk 'Java SE Runtime Environment 1.8.0_192'
+		maven 'maven-3.2.5'
+	}
+	options {
+		buildDiscarder logRotator(artifactDaysToKeepStr: '', artifactNumToKeepStr: '', daysToKeepStr: '14', numToKeepStr: '15')
+	}
+    stages {
+        stage('Checkout SCM') {
+            steps {
+                checkout poll: true, scm: [$class: 'GitSCM', branches: [[name: 'develop-upgrade']], userRemoteConfigs: [[credentialsId: 'df45239a-8629-4c43-a9e1-c868307e2d1d', url: 'https://github.com/epsilondigital/amitiza-aem.git']]]
+            }
+        }
+        stage('Build') {
+            steps {
+                sh 'mvn --file ./pom.xml clean install'
+            }
+        }
+    }
+	post {
+		success {
+			sh 'ui_apps=$(find ./ui.apps -name "*.zip"|cut -d/ -f4)'
+			sh 'curl -u jenkins-user:${params.PASSWD} -F force=true -F install=true -F name="$ui_apps" -F file=@"./ui.apps/target/${ui_apps}" http://${params.AUTHOR_IP}:4502/crx/packmgr/service.jsp'
+			sh 'curl -u jenkins-user:${params.PASSWD} -F force=true -F install=true -F name="$ui_apps" -F file=@"./ui.apps/target/${ui_apps}" http://${params.PUBLISH_IP}:4503/crx/packmgr/service.jsp'
+			sh 'curl -k -H "CQ-Action: DELETE" -H "CQ-Handle:/content/takeda/amitiza" -H "Content-Length: 0" -H "Content-Type: application/octet-stream" https://da2utakeaed02/dispatcher/invalidate.cache'
+			sh 'curl -k -H "CQ-Action: DELETE" -H "CQ-Handle:/content/takeda/amitizahcp" -H "Content-Length: 0" -H "Content-Type: application/octet-stream" https://da2utakeaed02/dispatcher/invalidate.cache'
+			sh 'curl -k -H "CQ-Action: DELETE" -H "CQ-Handle:/etc.clientlibs/amitiza" -H "Content-Length: 0" -H "Content-Type: application/octet-stream" https://da2utakeaed02/dispatcher/invalidate.cache'
+		}
+		failure {
+		
+		}
+		always {
+			emailext attachLog: true,
+			body: 'Check console output at $BUILD_URL to view the results',
+			to: "${EMAIL_RECIPIENTS}",
+			subject: '$DEFAULT_SUBJECT',
+			replyTo: '$DEFAULT_REPLYTO',
+			body: '$DEFAULT_CONTENT',
+		}
+	}
+}
