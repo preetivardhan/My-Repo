@@ -1,0 +1,21 @@
+########Docker pull OR FROM command in Dockerfile is not working due to being behind the proxy##########
+
+#Create a file if not present - /etc/systemd/system/docker.service.d/http-proxy.conf
+
+#Add proxy server details as below
+[Service]
+Environment="HTTP_PROXY=http://proxy.example.com:80"
+Environment="HTTPS_PROXY=https://proxy.example.com:443"
+
+#Reload docker daemon
+systemctl daemon-reload
+
+#Restart docker service
+systemctl restart docker
+
+#Verify if the proxy server details are populated by the below command
+systemctl show --property=Environment docker
+
+###############Login to docker (any public or private registry) via linux terminal#########################
+docker login docker registry URL   {Default is hub.docker.com} 
+
