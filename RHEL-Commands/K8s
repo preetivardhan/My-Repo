@@ -1,0 +1,21 @@
+###### List pods #####
+kubectl --kubeconfig <kubeconfig_file_path> -n <name_space> get pods
+
+##### Shell access to pod #######
+kubectl --kubeconfig <kubeconfig_file_path> -n <name_space> exec -it <pod_name> bash
+
+##### Delete pod #####
+kubectl --kubeconfig <kubeconfig_file_path> -n <name_space> delete pod <pod_name>
+
+###### Run/Deploy a pod ####
+kubectl apply -f deployment.yaml --kubeconfig <kubeconfig_file_path> -n <name_space>
+
+###### Describe a pod (Helps to see the deploy error) #####
+kubectl --kubeconfig <kubeconfig_file_path> -n <name_space> describe pod <pod_name>
+
+##### Get pod logs #######
+kubectl --kubeconfig <kubeconfig_file_path> -n <name_space> logs <pod_name>
+
+####### Copy file in to a running pod ####
+kubectl cp /local/file/path/ --kubeconfig <kubeconfig_file_path> -n <name_space> <pod_name>:/pod/path/
+
