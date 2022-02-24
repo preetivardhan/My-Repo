@@ -1,6 +1,6 @@
-########Docker pull OR FROM command in Dockerfile is not working due to being behind the proxy##########
+######## Docker pull OR FROM command in Dockerfile is not working due to being behind the proxy ##########
 
-#Create a file if not present - /etc/systemd/system/docker.service.d/http-proxy.conf
+Create a file if not present - /etc/systemd/system/docker.service.d/http-proxy.conf
 
 #Add proxy server details as below
 [Service]
@@ -16,6 +16,9 @@ systemctl restart docker
 #Verify if the proxy server details are populated by the below command
 systemctl show --property=Environment docker
 
-###############Login to docker (any public or private registry) via linux terminal#########################
+############### Login to docker (any public or private registry) via linux terminal #########################
 docker login docker registry URL   {Default is hub.docker.com} 
 
+########## Ubuntu docker container unable to connect to apt repo due to proxy issue, add these lines in the dockerfile during the docker build #############
+RUN bash -c "echo 'Acquire::https::Proxy \"http://proxy.example.com:port/\";' > /etc/apt/apt.conf.d/proxy.conf"
+RUN bash -c "echo 'Acquire::http::Proxy \"http://proxy.example.com:port/\";' >> /etc/apt/apt.conf.d/proxy.conf"
