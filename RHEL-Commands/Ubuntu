@@ -1,0 +1,5 @@
+#####If Ubuntu GUI doesn't load (not because of the password issue) 
+apt update
+apt upgrade
+apt-get install --reinstall ubuntu-desktop
+reboot
