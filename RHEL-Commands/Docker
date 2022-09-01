@@ -22,3 +22,20 @@ docker login docker registry URL   {Default is hub.docker.com}
 ########## Ubuntu docker container unable to connect to apt repo due to proxy issue, add these lines in the dockerfile during the docker build #############
 RUN bash -c "echo 'Acquire::https::Proxy \"http://proxy.example.com:port/\";' > /etc/apt/apt.conf.d/proxy.conf"
 RUN bash -c "echo 'Acquire::http::Proxy \"http://proxy.example.com:port/\";' >> /etc/apt/apt.conf.d/proxy.conf"
+
+#########################DOCKER NETWORKING###########
+
+######Get the running container IP######
+docker inspect -f '{{range.NetworkSettings.Networks}}{{.IPAddress}}{{end}}' container_name
+
+######Inspect the docker conatiner####
+docker inspect container_name
+
+docker network ls
+
+####Assign a static IP to container by creating a new network############
+docker network create -d macvlan \
+  --subnet=172.16.86.0/24 \
+  --gateway=172.16.86.1 \
+  -o parent=eth0 \         --> eth0 is the host network interface
+  my-macvlan-net
