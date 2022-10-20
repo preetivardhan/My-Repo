@@ -1,0 +1,4 @@
+
+aws ecr describe-images --repository-name vnext/promoted/config-service/config-service --profile inteks
+
+aws ecr get-login-password --region us-west-2 --profile test | docker login --username AWS --password-stdin 12345678.dkr.ecr.us-west-2.amazonaws.com
