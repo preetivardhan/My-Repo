@@ -1,0 +1,10 @@
+#################POWER-CLI###################
+Set-ExecutionPolicy Unrestricted                     --> Remove user resrtictions
+Import-Module PowerShellGet                          
+Install-Module VMware.PowerCLI                       --> Install PowerCli 
+
+Set-PowerCLIConfiguration -InvalidCertificateAction (Unset|Fail|Ignore|Warn|Prompt)
+
+Get-VM vm | %{(Get-View $_.Id).config.uuid}          --> Get the UUID of the VM
+
+Get-VM -Name "EM - 26.114.59 REC" | Start-VM         --> Start VM
