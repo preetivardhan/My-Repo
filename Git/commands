@@ -1,0 +1,13 @@
+## Clone a specific branch########### Helps when you have clone issue due to sub module error in master #########
+## You can change the submodule settings (.gitmodules file) and clone the specific brnach ##########
+
+git clone --recurse-submodules -b test git@github.com:org/repo.git
+
+### Make sure you changed the sub module path in .gitmodules file ###
+### This will merge the submodule to their latest commit ###
+
+git submodule update --remote --merge
+
+git add .
+git commit -m "commit message"
+git push
