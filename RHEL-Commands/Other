@@ -4,3 +4,7 @@ chattr +i file_name
 ###########snip the huge log file#########
 :1,.d   [Go to the line of a file from where the above lines are to be deleted]  --> Deletes everyline above the cursor
 :.,$d   [Go to the line of a file from where the below lines are to be deleted]  --> Deletes everyline below the cursor
+
+##### NMAP ######
+##### Nmap is a network scanner, used to discover hosts and services on a computer network by sending packets and analyzing the responses
+nmap -O IP
