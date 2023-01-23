@@ -8,3 +8,7 @@ chattr +i file_name
 ##### NMAP ######
 ##### Nmap is a network scanner, used to discover hosts and services on a computer network by sending packets and analyzing the responses
 nmap -O IP
+
+##### YUM install docker CE #######
+yum-config-manager     --add-repo     https://download.docker.com/linux/centos/docker-ce.repo
+yum install docker-ce
