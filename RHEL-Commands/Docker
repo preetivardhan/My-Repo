@@ -23,6 +23,46 @@ docker login docker registry URL   {Default is hub.docker.com}
 RUN bash -c "echo 'Acquire::https::Proxy \"http://proxy.example.com:port/\";' > /etc/apt/apt.conf.d/proxy.conf"
 RUN bash -c "echo 'Acquire::http::Proxy \"http://proxy.example.com:port/\";' >> /etc/apt/apt.conf.d/proxy.conf"
 
+################ DOCKER Installation on CENTOS #########
+sudo yum-config-manager     --add-repo     https://download.docker.com/linux/centos/docker-ce.repo
+sudo yum install docker-ce
+sudo service docker start
+sudo usermod -aG docker $USER
+sudo setfacl -m user:$USER:rw /var/run/docker.sock
+
+sudo systemctl enable docker.service
+sudo systemctl enable containerd.service
+
+########
+sudo curl -L "https://github.com/docker/compose/releases/download/1.29.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+sudo chmod +x /usr/local/bin/docker-compose
+docker-compose --version
+sudo mv /usr/local/bin/docker-compose /bin/
+sudo /bin/docker-compose --version
+###### Incase of "error while loading shared libraries: libz.so.1" error ########
+sudo mount /tmp -o remount,exec
+sudo /bin/docker-compose --version
+sudo chmod 7777 /bin/docker-compose
+docker-compose --version
+##########################################
+
+sudo docker version
+sudo systemctl status docker.service
+sudo docker ps -a
+sudo docker run -it httpd:latest "/bin/bash" (Launch the conainer with bash shell)
+Ctrl+p+q --> Come out of the docker image without stopping it.
+sudo docker attach 8917938d0ec8 (container id) --> To go in to the container
+sudo docker rm <cont id>
+systemctl daemon-reload
+systemctl restart docker
+
+docker run -d --name my-running-app my-php-app
+docker run -dit --name my-running-app -p 8080:80 my-apache2
+
+docker run -d --name postdb -e POSTGRESQL_USER=postgres -e POSTGRESQL_PASSWORD=Epsilon@123 -e POSTGRESQL_DATABASE=newdb -p 54321:5432 postgres:latest
+docker run -d --name os --link postdb centos:latest
+docker run -d --name os-pytpost --link postdb python:latest
+
 #########################DOCKER NETWORKING###########
 
 ######Get the running container IP######
