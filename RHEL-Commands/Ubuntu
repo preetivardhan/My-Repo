@@ -3,3 +3,9 @@ apt update
 apt upgrade
 apt-get install --reinstall ubuntu-desktop
 reboot
+
+##############screens######
+Helps in running any long script in detached console 
+Ctrl+A and then D to come out of the screen
+screen -ls                    to list the available screens
+screen -r <id>                to attach to screen
