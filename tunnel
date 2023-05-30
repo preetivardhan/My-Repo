@@ -1,0 +1,3 @@
+ssh -o ExitOnForwardFailure=yes -f -N -L 0.0.0.0:8046:3.92.53.143:22 -i siem-jump-host.pem siem@54.159.214.214
+sudo ssh -o ExitOnForwardFailure=yes -f -N -L 0.0.0.0:443:52.90.80.200:443 -i siem-jump-host.pem siem@54.159.214.214
+Mcafee123$
