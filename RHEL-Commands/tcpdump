@@ -1,0 +1,1 @@
+tcpdump -nni ens32 host 10.10.10.10
