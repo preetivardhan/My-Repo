@@ -1,0 +1,32 @@
+# This explains pain partition in Linux # Other way si to use LVM which is easier
+
+**Consider below example**
+Take not of Start and End blocks of each disk.
+sda1 ends at 96471039 and sda2 starts at 96473086 (/dev/sda2 and /dev/sda5 (swap) occupy a 4 GB region immediately after /dev/sda1)
+Most of the 600 GB is unallocated, but it’s after the swap partition, so you can't extend /dev/sda1 directly.
+
+/dev/sda has been extended to 650GB of size. 
+
+*sudo fdisk -l*
+Disk /dev/sda: 650 GiB, 697932185600 bytes, 1363148800 sectors
+Units: sectors of 1 * 512 = 512 bytes
+Sector size (logical/physical): 512 bytes / 512 bytes
+I/O size (minimum/optimal): 512 bytes / 512 bytes
+Disklabel type: dos
+Disk identifier: 0xc85de148
+
+Device     Boot    Start       End  Sectors Size Id Type
+/dev/sda1  *        2048  96471039 96468992  46G 83 Linux
+/dev/sda2       96473086 104855551  8382466   4G  5 Extended
+/dev/sda5       96473088 104855551  8382464   4G 82 Linux swap / Solaris
+
+# Now mount /dev/sda to a mount point on the device /mnt #
+fdisk /dev/sda
+(hit m for available options/help)
+n -> for new partiotion (do this in out case as we are creating new partition fron /dev/sda)
+Accept all default vaules after this. Like start sector and end sector. 
+hit w to write changes to the partition table.
+
+After creating partition, format the new partition.
+
+sudo mkfs.ext4 /dev/sda6
