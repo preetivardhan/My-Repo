@@ -1,0 +1,8 @@
+npm login --registry=https://<your-artifactory-domain>/artifactory/api/npm/<repo-name>/
+
+If you registry is scoped do this in .npmrc
+@myorg:registry=https://your-artifactory-domain/artifactory/api/npm/npm-repo/
+npm login --scope=@myorg
+
+Debug output
+npm login --registry=https://... --loglevel verbose
