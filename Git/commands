@@ -11,3 +11,21 @@ git submodule update --remote --merge
 git add .
 git commit -m "commit message"
 git push
+
+-------Rebase and merge---------
+git pull --rebase [on local branch]
+git checkout master
+git pull --rebase
+git checkout rel/11.x.x
+git checkout master
+git merge origin/rel/11.x.x  → This will merge the rel/11.x.x of remote repo to the checked in local branch
+
+
+Git checkout rel/11.x.x
+ Git show  {it shows the sha of the last commit}
+ Git tag 11.x.x-b1234  -m "Message"	{Where b is the constant for build and 1234 is the 4 digit     build number in the release email}
+ Git push --tags
+
+ Git checkout master
+ Git branch -D rel/11.x.x
+
