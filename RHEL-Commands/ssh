@@ -1,1 +1,15 @@
 sshpass -p "$SV_PASS" scp -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no ./file/path/*.js $SV_USER@$IP:/path/to/copy
+
+============SSH to VM C from VM A via VM B=========
+Incase if we a are using jumphost to connect to VM C, top copy files directly from VM C to VM A (via VM B) use this command
+
+# Start the agent
+eval "$(ssh-agent)"
+
+# Add both keys
+ssh-add ~/.ssh/key_for_vm_b
+ssh-add ~/.ssh/key_for_vm_c (Both the ssh keys should be on the source VM, just copy it to here from VM B which is a jump host)
+
+# Then run:
+scp -o ProxyJump=user_b@vm_b user_c@vm_c:/path/to/file /path/to/local/
+
