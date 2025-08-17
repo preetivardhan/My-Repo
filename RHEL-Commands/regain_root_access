@@ -1,0 +1,13 @@
+##For any Linux VM if you don't have root access and whoever have root access has left the org do the following
+###This needs admin access to proxmox or Vcenter console
+
+reboot the vm from the vcenter/proxmox console -> hit 'Esc' to load the grub screen while it boots up
+
+Find the line - linux /boot/vmlinuz-... root=UUID=...
+At the end of this line append - init=/bin/bash
+Boot it by presssing Ctrl+X (or F10)
+You will be landed to root shell
+Mount the root partition as write - mount -o remount,rw /
+Now you can do anything like edit the /etc/grops file or edit the fstab or visudo (/etc/sudoers) file to add user to root access etc.
+
+exec /sbin/init - To boot the instance normally.
